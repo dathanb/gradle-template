@@ -1,0 +1,12 @@
+apply plugin: "java"
+apply from: "\$rootDir/gradle/idea-custom-config.gradle"
+apply from: "\$rootDir/gradle/setup.gradle"
+apply plugin: "gitsemver"
+
+group "${config.groupName}"
+description = "${config.description}"
+version semverVersion()
+
+dependencies {
+    compile ("com.google.guava:guava:18.0")
+}

@@ -1,0 +1,69 @@
+class Config {
+ def projectName
+ def groupName
+ def description
+}
+
+project.ext.config = new Config()
+
+task ask << {
+  def console = System.console()
+  if (console) {
+    project.config.projectName = console.readLine("> Please enter a project name (ie: My Awesome Project): ")
+    project.config.groupName = console.readLine("> Please enter a group name (ie: com.palantir): ")
+    project.config.description = console.readLine("> Please enter a project description (ie: saves the world): ")
+  } else {
+    logger.error "Cannot get console."
+  }
+}
+
+task templatize(type: Copy) {
+    into '.'
+    from "$rootDir/templates/"
+    include '*.tmpl'
+    rename { file -> file.replace(".tmpl", "") }
+    expand(project: project, config: project.config)
+}
+
+task copyFiles(type: Copy) {
+    from "$rootDir/files"
+    into "$rootDir"
+    include "buildSrc/**"
+}
+
+task createFolders << {
+  println "Creating standard directory structure"
+  [
+    "src/main/java",
+    "src/main/resources",
+    "src/test/java",
+    "src/test/resources"
+  ].each {
+    println("\tCreating ${rootDir}/${it}")
+    new File("${rootDir}/${it}").mkdirs()
+  }
+}
+
+task gitIgnore(type: Copy) {
+  from "$rootDir/templates/"
+  into "."
+  include "gitignore-project"
+  rename("gitignore-project", ".gitignore")
+}
+
+task finale << {
+  println ""
+  println "================================================================================================"
+  println "Your project is ready to go, but you'll still need to add dependencies in the build.gradle file." 
+  println "================================================================================================"
+  println ""
+}
+
+templatize.dependsOn ask
+finale.dependsOn copyFiles
+finale.dependsOn templatize
+finale.dependsOn createFolders
+finale.dependsOn gitIgnore
+
+defaultTasks 'finale'
+
