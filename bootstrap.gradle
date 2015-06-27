@@ -25,12 +25,6 @@ task templatize(type: Copy) {
     expand(project: project, config: project.config)
 }
 
-task copyFiles(type: Copy) {
-    from "$rootDir/files"
-    into "$rootDir"
-    include "buildSrc/**"
-}
-
 task createFolders << {
   println "Creating standard directory structure"
   [
@@ -60,7 +54,6 @@ task finale << {
 }
 
 templatize.dependsOn ask
-finale.dependsOn copyFiles
 finale.dependsOn templatize
 finale.dependsOn createFolders
 finale.dependsOn gitIgnore
