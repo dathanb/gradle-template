@@ -14,7 +14,7 @@ rm -f LICENSE README.md
 # ================================
 # Initialize project Gradle config
 # ================================
-./gradlew -b bootstrap.gradle
+./gradlew -b bootstrap.gradle --warning-mode all
 
 # ======================
 # Cleanup template stuff

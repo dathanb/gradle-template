@@ -6,16 +6,20 @@ class Config {
 
 project.ext.config = new Config()
 
-task ask << {
-  def console = System.console()
-  if (console) {
-    project.config.projectName = console.readLine("> Please enter a project name (ie: My Awesome Project): ")
-    project.config.groupName = console.readLine("> Please enter a group name (ie: com.palantir): ")
-    project.config.description = console.readLine("> Please enter a project description (ie: saves the world): ")
+task(ask).doLast({
+  def stdin = System.in
+  if (stdin) {
+    def reader = stdin.newReader()
+    System.out.println("> Please enter a group name (e.g., com.stuff): ")
+    project.config.groupName = reader.readLine()
+    System.out.println("> Please enter a project name (e.g., doer): ")
+    project.config.projectName = reader.readLine()
+    System.out.println("> Please enter a project description (e.g., does stuff): ")
+    project.config.description = reader.readLine()
   } else {
     logger.error "Cannot get console."
   }
-}
+})
 
 task templatize(type: Copy) {
     into '.'
@@ -25,7 +29,7 @@ task templatize(type: Copy) {
     expand(project: project, config: project.config)
 }
 
-task createFolders << {
+task(createFolders).doLast({
   println "Creating standard directory structure"
   [
     "src/main/java",
@@ -36,7 +40,7 @@ task createFolders << {
     println("\tCreating ${rootDir}/${it}")
     new File("${rootDir}/${it}").mkdirs()
   }
-}
+})
 
 task gitIgnore(type: Copy) {
   from "$rootDir/templates/"
@@ -45,13 +49,13 @@ task gitIgnore(type: Copy) {
   rename("gitignore-project", ".gitignore")
 }
 
-task finale << {
+task(finale).doLast({
   println ""
   println "================================================================================================"
   println "Your project is ready to go, but you'll still need to add dependencies in the build.gradle file." 
   println "================================================================================================"
   println ""
-}
+})
 
 templatize.dependsOn ask
 finale.dependsOn templatize
